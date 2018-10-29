@@ -1,0 +1,483 @@
+// Course:  CS213 - Programming II  - 2018
+// Title:   Assignment I - Task 1 - Problem 0
+// Program: CS213-2018-A1-T1-P0
+// Purpose: Matrix operator overloading
+// Authors: Hussien Ashraf, Ehap Fawzy, Thomas
+// IDs:     20170093, 20170072, 20170081
+// Date:    10 August 2018
+// Version: 1.0
+
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <vector>
+
+using namespace std;
+
+struct matrix
+{
+  int** data;
+  int row, col;
+};
+
+vector < matrix > selected_memory;
+const int setwValue = 4;
+
+void createMatrix  ( int row , int col , int num[] , matrix& mat );
+void createMatrix  ( int row , int col , int val   , matrix& mat );
+void createMatrix  ( int row , int col , matrix& mat );
+void releaseMemory ( vector < matrix >& sm );
+
+// Student #1 with the smallest ID
+// All these operations return a new matrix with the calculation result
+matrix operator+  ( matrix mat1 , matrix mat2 );  // Add if same dimensions
+matrix operator-  ( matrix mat1 , matrix mat2 );  // Sub if same dimensions
+matrix operator*  ( matrix mat1 , matrix mat2 );  // Multi if col1 == row2
+matrix operator+  ( matrix mat1 , int scalar  );  // Add a scalar
+matrix operator-  ( matrix mat1 , int scalar  );  // Subtract a scalar
+matrix operator*  ( matrix mat1 , int scalar  );  // Multiple by scalar
+
+// Student #2 with the middle ID
+matrix operator+= ( matrix& mat1, matrix mat2 );
+matrix operator-= ( matrix& mat1, matrix mat2 );
+matrix operator+= ( matrix& mat1, int value );
+matrix operator-= ( matrix& mat1, int value );
+
+// prefix  operator overloading eg ( ++x || --x )
+matrix operator++ ( matrix& mat );
+matrix operator-- ( matrix& mat );
+
+// postfix operator overloading eg ( x++ || x-- )
+matrix operator++ ( matrix& mat , int );
+matrix operator-- ( matrix& mat , int );
+
+bool operator== ( matrix mat1 , matrix mat2 );
+bool operator!= ( matrix mat1 , matrix mat2 );
+istream& operator>> ( istream& in , matrix& mat );
+
+//Student #3 with the biggest ID
+ostream& operator<< ( ostream& out , matrix mat );
+bool   operator== ( matrix mat1 , matrix mat2 );	// True if identical
+bool   operator!= ( matrix mat1 , matrix mat2 ); 	// True if not same
+bool   isSquare   ( matrix mat );  // True if square matrix
+bool   isSymetric ( matrix mat );  // True if square and symmetric
+bool   isIdentity ( matrix mat );  // True if square and identity
+matrix transpose  ( matrix mat );  // Return new matrix with the transpose
+
+int main()
+{
+    int data1 [] = {1,2,3,4,5,6,7,8};
+    int data2 [] = {13,233,3,4,5,6};
+    int data3 [] = {10,100,10,100,10,100,10,100};
+
+    matrix mat1, mat2, mat3;
+    //createMatrix (4, 2, data1, mat1);
+    //createMatrix (2, 3, data2, mat2);
+    //createMatrix (4, 2, data3, mat3);
+
+    createMatrix( 4 , 2 , data1 , mat1 );
+    createMatrix( 2 , 4 , data1 , mat2 );
+    createMatrix( mat1.row , mat2.col , 0 , mat3 );
+    mat3 = mat1*mat2;
+    cout << mat3;
+
+
+    /*cout << mat1 << endl;
+    cout << mat2 << endl;
+    cout << mat3 << endl;
+
+    cout << (mat1 + mat3) << endl << endl;
+    cout << (mat3 + mat3) << endl << endl;
+
+    ++mat1;
+    cout << mat1 << endl;
+
+    mat1+= mat3 += mat3;
+    cout << mat1 << endl;
+    cout << mat2 << endl;
+    cout << mat3 << endl;*/
+
+    releaseMemory( selected_memory );
+    return 0;
+}
+
+
+void createMatrix  (int row, int col, int num[], matrix& mat)
+{
+    mat.row = row;
+    mat.col = col;
+
+    mat.data = new int* [row];
+    for ( int i = 0; i < row; i++ ) mat.data[ i ] = new int [col];
+
+    int index = 0;
+    for ( int i = 0; i < row; i++ )
+    {
+        for ( int j = 0; j < col; j++ ) mat.data[i][j] = num[ index++ ];
+    }
+
+    selected_memory.push_back( mat );
+}
+
+void createMatrix  (int row, int col, int val  , matrix& mat)
+{
+    mat.row = row;
+    mat.col = col;
+
+    mat.data = new int* [row];
+    for ( int i = 0; i < row; i++ ) mat.data[ i ] = new int [col];
+
+    for ( int i = 0; i < row; i++ )
+    {
+        for ( int j = 0; j < col; j++ ) mat.data[i][j] = val;
+    }
+
+    selected_memory.push_back( mat );
+}
+void createMatrix  (int row, int col, matrix& mat)
+{
+    mat.row = row;
+    mat.col = col;
+
+    mat.data = new int* [row];
+    for ( int i = 0; i < row; i++ ) mat.data[ i ] = new int [col];
+
+    selected_memory.push_back( mat );
+}
+
+void releaseMemory ( vector < matrix >& sm )
+{
+    for ( int i = 0; i < sm.size(); i++ )
+    {
+        for ( int row = 0; row < sm[i].row; row++ ) delete[] sm[i].data[row];
+        delete[] sm[i].data;
+    }
+
+    for ( int i = 0; i < sm.size(); i++ ) sm.pop_back();
+}
+
+
+matrix operator+  ( matrix mat1 , matrix mat2 )
+{
+    if ( mat1.row == mat2.row && mat1.col == mat2.col)
+    {
+        matrix newMat; int sum = 0;
+        createMatrix( mat1.row , mat1.col , sum , newMat );
+        for ( int i = 0; i < mat1.row; i++ )
+        {
+            for ( int j = 0; j < mat1.col; j++)
+                newMat.data[i][j] = mat1.data[i][j] + mat2.data [i][j];
+        }
+        return newMat;
+    }
+    else
+        cout << " enter two matrices in the same size " << endl ;
+
+    return mat1;
+}
+
+matrix operator-  ( matrix mat1 , matrix mat2 )
+{
+    if ( mat1.row == mat2.row && mat1.col == mat2.col)
+    {
+        matrix newMat; int sum = 0;
+        createMatrix( mat1.row , mat1.col , sum , newMat );
+        for ( int i = 0; i < mat1.row; i++ )
+        {
+            for ( int j = 0; j < mat1.col; j++)
+                newMat.data[i][j] = mat1.data[i][j] - mat2.data [i][j];
+        }
+        return newMat;
+    }
+    else
+        cout << " enter two matrices in the same size " << endl ;
+
+    return mat1;
+}
+
+matrix operator*  ( matrix mat1 , matrix mat2 )
+{
+    if ( mat1.col == mat2.row )
+    {
+        matrix newMat; int sum = 0;
+        createMatrix( mat1.row , mat2.col , sum , newMat);
+
+        for ( int i = 0; i < mat1.row; i++ )
+        {
+            for ( int j = 0; j < mat2.col; j++ )
+            {
+                sum = 0;
+                for ( int k = 0; k < mat2.row; k++ )
+                {
+                    sum += mat1.data[i][k] * mat2.data[k][j];
+                }
+                newMat.data[i][j] = sum;
+            }
+        }
+        return newMat ;
+    }
+    return mat1;
+}
+
+matrix operator+  ( matrix mat1 , int scalar )
+{
+    matrix newMat; int sum = 0;
+    createMatrix( mat1.row , mat1.col , sum , newMat );
+
+    for ( int i = 0; i < mat1.row; i++ )
+    {
+        for ( int j = 0; j < mat1.col; j++ )
+            newMat.data[i][j] = mat1.data[i][j] + scalar;
+    }
+
+    return newMat;
+}
+
+matrix operator-  ( matrix mat1 , int scalar )
+{
+    matrix newMat; int sum = 0;
+    createMatrix( mat1.row , mat1.col , sum , newMat );
+
+    for ( int i = 0; i < mat1.row; i++ )
+    {
+        for ( int j = 0; j < mat1.col; j++ )
+            newMat.data[i][j] = mat1.data[i][j] - scalar;
+    }
+
+    return newMat;
+}
+
+matrix operator*  ( matrix mat1 , int scalar )
+{
+    matrix newMat; int sum = 0;
+    createMatrix( mat1.row , mat1.col , sum , newMat );
+
+    for ( int i = 0; i < mat1.row; i++ )
+    {
+        for ( int j = 0; j < mat1.col; j++ )
+            newMat.data[i][j] = mat1.data[i][j] * scalar;
+    }
+    return newMat;
+}
+
+matrix operator+= ( matrix& mat1 , matrix mat2 )
+{
+    if ( mat1.row != mat2.row || mat1.col != mat2.col ) return mat1;
+
+    for ( int i = 0; i < mat1.row; i++ )
+        for ( int j = 0; j < mat1.col; j++ ) mat1.data[i][j] += mat2.data[i][j];
+
+    return mat1;
+}
+
+matrix operator-= ( matrix& mat1 , matrix mat2 )
+{
+    if ( mat1.row != mat2.row || mat1.col != mat2.col ) return mat1;
+
+    for ( int i = 0; i < mat1.row; i++ )
+        for ( int j = 0; j < mat1.col; j++ ) mat1.data[i][j] -= mat2.data[i][j];
+
+    return mat1;
+}
+
+matrix operator+= ( matrix& mat1 , int value )
+{
+    for ( int i = 0; i < mat1.row; i++ )
+        for ( int j = 0; j < mat1.col; j++ ) mat1.data[i][j] += value;
+
+    return mat1;
+}
+
+matrix operator-= ( matrix& mat1 , int value )
+{
+    for ( int i = 0; i < mat1.row; i++ )
+        for ( int j = 0; j < mat1.col; j++ ) mat1.data[i][j] -= value;
+
+    return mat1;
+}
+
+matrix operator++ ( matrix& mat )
+{
+    for ( int i = 0; i < mat.row; i++ )
+        for ( int j = 0; j < mat.col; j++ ) mat.data[i][j]++;
+
+    return mat;
+}
+
+matrix operator-- ( matrix& mat )
+{
+    for ( int i = 0; i < mat.row; i++ )
+        for ( int j = 0; j < mat.col; j++ ) mat.data[i][j]--;
+
+    return mat;
+}
+
+matrix operator++ ( matrix& mat , int )
+{
+    matrix essential_values;
+    createMatrix( mat.row , mat.col , essential_values );
+
+    for ( int i = 0; i < mat.row; i++ )
+    {
+        for ( int j = 0; j < mat.col; j++ )
+        {
+            essential_values.data[i][j] = mat.data[i][j]++;
+        }
+    }
+    return essential_values;
+}
+matrix operator-- ( matrix& mat , int )
+{
+    matrix essential_values;
+    createMatrix( mat.row , mat.col , essential_values );
+
+    for ( int i = 0; i < mat.row; i++ )
+    {
+        for ( int j = 0; j < mat.col; j++ )
+        {
+            essential_values.data[i][j] = mat.data[i][j]--;
+        }
+    }
+    return essential_values;
+}
+
+istream& operator>> ( istream& in , matrix& mat )
+{
+    for ( int i = 0; i < mat.row; i++ )
+        for ( int j = 0; j < mat.col; j++ ) in >> mat.data[i][j];
+    return in;
+}
+
+ostream& operator<< ( ostream& out , matrix mat )
+{
+    out << setw( setwValue );
+    for ( int i = 0; i < mat.row; i++ )
+    {
+        for ( int j = 0; j < mat.col; j++ ) out << mat.data[i][j] << setw( setwValue );
+        out << endl;
+    }
+    return out;
+}
+
+bool   operator== ( matrix mat1 , matrix mat2 )
+{ //check if the first matrix equals the second matrix, if yes then return true
+    if ( mat1.col == mat2.col && mat1.row == mat2.row ) //check if same size
+    {
+        int check = 0; // assume they are equal (true)
+        for (int i = 0; i < mat1.row; i++ )
+        {
+            for ( int j = 0; j < mat1.col; j++ )
+            {//loop through all elements of the matrix
+                if ( mat1.data[i][j] != mat2.data[i][j] )
+                {
+                    check++ ;// add 1 to the check integer in order to make it more than zero
+                }
+            }
+        }
+        if ( check == 0 )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool   operator!= ( matrix mat1 , matrix mat2 )
+{ //check if the first matrix doesnt equals the second matrix, if yes then return true
+    if ( mat1 == mat2 )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+bool   isSquare   ( matrix mat )
+{ // if matrix is square with same rows and same columns then return true
+    if ( mat.col == mat.row )
+    {//checks if rows equals columns
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool   isSymetric ( matrix mat )
+{//symmetric matrix is a square matrix that is equal to its transpose.
+    if ( isSquare(mat) )
+    {//checks if matrix is square
+        if ( mat == transpose(mat) )
+        {//checks if matrix is equal to its transpose
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        return false;
+    }
+
+}
+
+bool   isIdentity (matrix mat)
+{//identity matrix is a square matrix with all main diagonal ones and the rest is zero
+    if ( isSquare(mat) )
+    {//checks if square
+        for ( int i = 0; i < mat.row; i++ )
+        {
+            for ( int j = 0; j < mat.col; j++)
+            {//loops through the whole matrix
+                if( i == j )
+                {
+                    if ( mat.data[i][j] != 1 )
+                    {//checks that main diagonal is all ones
+                        return false;
+                    }
+                }
+                if ( i != j )
+                {
+                    if ( mat.data[i][j]!= 0 )
+                    {//checks that all the other elements are zeros
+                        return false;
+                    }
+                }
+            }
+
+        }
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+matrix transpose( matrix mat )
+{//changes rows into columns and columns into rows
+    int data_temp[] = {};
+    matrix trans;//the transposed matrix
+    createMatrix(mat.col, mat.row, data_temp, trans );
+    for ( int i = 0; i < mat.row; i++ )
+    {
+        for ( int j = 0; j < mat.col; j++ )
+        {
+            trans.data[i][j] = mat.data[j][i];
+        }
+    }
+    return trans;
+}
